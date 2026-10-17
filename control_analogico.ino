@@ -31,8 +31,7 @@ void flancoA();
 // ---------------- Función de Polinómica Experimental PWM = f(V) ----------------
 int calcularPWM_Experimental(float Voltaje) {
   // Evaluación eficiente por la regla de Horner:
-  // PWM = 47.598 + V * (-30.14 + V * (15.529 + V * (-2.5903 + V * 0.1495)))
-  float PWM = 47.598 + Voltaje * (-30.14 + Voltaje * (15.529 + Voltaje * (-2.5903 + Voltaje * 0.1495)));
+  float PWM = -374274 + Voltaje * (222019 + Voltaje * (52480 + Voltaje * (6181.5 + Voltaje * 8.5006)));
 
   // Opcional: limitar los valores y convertir a entero para el L298N
   return constrain((int)PWM, 0, 255);
@@ -40,7 +39,6 @@ int calcularPWM_Experimental(float Voltaje) {
 
 float calcularVoltaje_Velocidad(float Velocidad) {
   // Evaluación eficiente por la regla de Horner:
-  // PWM = 47.598 + V * (-30.14 + V * (15.529 + V * (-2.5903 + V * 0.1495)))
   float Voltaje = 0.8895 * Velocidad + 0.839;
   if(V_MAX>10){
     Voltaje=10;
