@@ -40,12 +40,7 @@ int calcularPWM_Experimental(float Voltaje) {
 float calcularVoltaje_Velocidad(float Velocidad) {
   // Evaluación eficiente por la regla de Horner:
   float Voltaje = 0.8895 * Velocidad + 0.839;
-  if(V_MAX>10){
-    Voltaje=10;
-  }else if (-V_MAX<-10) {
-    Voltaje=-10;  
-  }
-  return Voltaje;
+  return constrain((float)Voltaje, -10, 10);
 }
 void setup() {
   Serial.begin(115200);
@@ -74,10 +69,7 @@ void loop() {
       // 1. Convertir la lectura cruda al voltaje FÍSICO real del pin (0.0V a 5.0V)
   float voltaje_pin = adc_raw * (5.0 / 1023.0); 
 
-  // 2. Convertir el voltaje físico a tu escala de Control (-10V a +10V)
-  // Como 2.5V representa 0V, le restamos 2.5 para centrarlo (queda de -2.5 a +2.5).
-  // Luego lo multiplicamos por 4 para expandirlo al rango de -10 a +10.
-  float u_control = (voltaje_pin - 2.4) * 5.0;
+  float u_control = (voltaje_pin - 2.5) * 5.0;
   constrain(u_control, -10, 10);
 
 

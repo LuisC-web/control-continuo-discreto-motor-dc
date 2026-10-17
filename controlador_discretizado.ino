@@ -49,9 +49,7 @@ int calcularPWM_Experimental(float Voltaje) {
 
 float calcularVoltaje_Velocidad(float Velocidad) {
   float Voltaje = 0.8895 * Velocidad + 0.839;
-  if(Voltaje > 10.0) Voltaje = 10.0;
-  else if (Voltaje < -10.0) Voltaje = -10.0;  
-  return Voltaje;
+  return  constrain((float)Voltaje, -V_MAX, V_MAX);
 }
 
 void setup() {
