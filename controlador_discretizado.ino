@@ -8,7 +8,7 @@ Adafruit_MCP4725 dac;
 // 4: Invarianza al Impulso | 5: Invarianza al Escalón
 int METODO_DISCRETO = 5; 
 
-const float Kp = 1.8;
+const float Kp = 1.5;
 const float Ki = 10.0;
 const float T = 0.023; // Tiempo de muestreo: 20ms
 
@@ -81,17 +81,14 @@ void loop() {
     case 1: // Diferencia Atrás
       u_k = u_k_1 + (Kp + Ki * T) * e_k - Kp * e_k_1;
       break;
-    case 2: // Diferencia Adelante
+    case 2: // Diferencia Adelante Invarianza al Escalón (ZOH)
       u_k = u_k_1 + Kp * e_k + (Ki * T - Kp) * e_k_1;
       break;
     case 3: // Trapezoidal (Tustin) - Corregido el signo de resta
       u_k = u_k_1 + (Kp + (Ki * T) / 2.0) * e_k + ((Ki * T) / 2.0 - Kp) * e_k_1;
       break;
     case 4: // Invarianza al Impulso
-      u_k = u_k_1 + (Kp * T + Ki * T) * e_k - Kp * T * e_k_1;
-      break;
-    case 5: // Invarianza al Escalón (ZOH)
-      u_k = u_k_1 + Kp * e_k + (Ki * T - Kp) * e_k_1;
+      u_k = u_k_1 + (Ki T) * e_k;
       break;
   }
 
