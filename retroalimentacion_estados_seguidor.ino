@@ -17,30 +17,20 @@ Adafruit_MCP4725 dac;
 // ---------------- Configuración de Tiempo ----------------
 float T = 0.014;                      // Periodo de muestreo [s] (igual al de MATLAB)
 
-// ---------------- Matrices del Modelo Discreto (Pegar de MATLAB) ----------------
-// x[k+1] = G*x[k] + H*u[k]
-// y[k]   = C*x[k]
-const float G11 = 0.9612, G12 = 0.0087;
-const float G21 = -2.411, G22 = 0.4253;
 
-const float H1 = 0.0241;
-const float H2 = 2.8482;
-
-const float C1 = 1.0;
-const float C2 = 0.0;
 
 // ---------------- Ganancias del Controlador y Estimador Actual (MATLAB) ---------
-const float K1   = 0.4500;            // Ganancia integral (K1)
-const float K2_1 = 0.8500;            // Realimentación estado 1 (K2(1))
-const float K2_2 = 0.0150;            // Realimentación estado 2 (K2(2))
-
-const float L1   = 0.9612;            // Ganancia estimador actual L(1)
-const float L2   = 65.400;            // Ganancia estimador actual L(2)
+const float K1   = 3.4377;            // Ganancia integral (K1)
+const float K2_1 = 4.6523;            // Realimentación estado 1 (K2(1))
+const float K2_2 = 0.0071;            // Realimentación estado 2 (K2(2))
 
 // Matrices precalculadas del estimador actual:
 // x_est[k] = (G - L*C*G)*x_est[k-1] + (H - L*C*H)*u[k-1] + L*y[k]
-float Ae11 = 0.0, Ae12 = 0.0, Ae21 = 0.0, Ae22 = 0.0;
-float Be1  = 0.0, Be2  = 0.0;
+// x_est[k] = Ae*x_est[k-1] + Be*u[k-1] + L*y[k]
+float Ae11 = 0.0, Ae12 = 0.0, Ae21 = -0.1460, Ae22 = 0;
+float Be1  = 0.0, Be2  = 10.9952;
+const float L1   = 1;            // Ganancia estimador actual L(1)
+const float L2   = -10.1051;            // Ganancia estimador actual L(2)
 
 // ---------------- Variables de Estado (solo se usan dentro de la ISR) ----------
 float x1_est_k = 0.0, x1_est_k_1 = 0.0;
@@ -59,8 +49,8 @@ const int encoderA = 2;
 const int encoderB = 3;
 
 // ---------------- Parámetros del Sistema ----------------
-const float V_MAX = 10.0;
-const int PPR = 750;
+const float V_MAX = 12.0;
+const int PPR = 509.9;
 
 volatile unsigned long tiempoAnteriorA = 0;
 volatile bool primerFlanco = true;
@@ -91,21 +81,6 @@ float calcularVoltaje_Velocidad(float Velocidad) {
   return constrain(Voltaje, -V_MAX, V_MAX);
 }
 
-// Precalcula Ae = (G - L*C*G) y Be = (H - L*C*H) una sola vez al iniciar
-void calcularMatricesEstimador() {
-  float CG1 = C1 * G11 + C2 * G21;
-  float CG2 = C1 * G12 + C2 * G22;
-
-  Ae11 = G11 - L1 * CG1;
-  Ae12 = G12 - L1 * CG2;
-  Ae21 = G21 - L2 * CG1;
-  Ae22 = G22 - L2 * CG2;
-
-  float CH = C1 * H1 + C2 * H2;
-
-  Be1 = H1 - L1 * CH;
-  Be2 = H2 - L2 * CH;
-}
 
 // Configura Timer1 para el periodo deseado e inicializa variables en cero
 void configurarTimer1(float T_deseado) {
@@ -132,9 +107,7 @@ void configurarTimer1(float T_deseado) {
   TCCR1B = (1 << WGM12) | bits[i];
   OCR1A  = ocr;
   TCNT1  = 0;
-
-  calcularMatricesEstimador();
-
+  
   // Inicializar TODAS las variables en CERO
   x1_est_k = x1_est_k_1 = 0.0;
   x2_est_k = x2_est_k_1 = 0.0;
