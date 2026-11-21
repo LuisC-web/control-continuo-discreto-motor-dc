@@ -72,12 +72,16 @@ volatile uint8_t contMuestras = 0;
 void flancoA();
 
 int calcularPWM_Experimental(float Voltaje) {
-  float PWM = -374274.0 + Voltaje * (222019.0 + Voltaje * (-52480.0 + Voltaje * (6181.5 + Voltaje * (-362.93 + Voltaje * 8.5006))));
-  return constrain((int)PWM, 0, 255);
+  if (fabs(Voltaje) < 2.18) return 0; 
+  float PWM = -374274.5 + Voltaje * (222018.6 + Voltaje * (-52479.65 + Voltaje * (6181.513 + Voltaje * (-362.9321 + Voltaje * 8.500599))));
+  int pwm_out = constrain((int)PWM, 0, 255);
+  return (pwm_out < 40) ? 0 : pwm_out;
 }
 
 float calcularVoltaje_Velocidad(float Velocidad) {
-  float Voltaje = 0.8895 * Velocidad + 0.839;
+  if (fabs(Velocidad) < 2.26) return 0.0;
+  float signo = (Velocidad >= 0.0) ? 1.0 : -1.0;
+  float Voltaje = signo * ((0.9948340 * fabs(Velocidad)) - 0.3015020);
   return constrain(Voltaje, -V_MAX, V_MAX);
 }
 
